@@ -13,7 +13,7 @@ type  User{
     id:ID
     name:String!
     email:String!
-    messages:Message
+    messages:[Message]
  }
 
 type Message{
@@ -41,8 +41,8 @@ type Mutation{
 
 type Subscription{
 
-    newuser:User
-    newmessage(receiverEmail:String):Message
+    newUser:User
+    newMessage(receiverEmail:String):Message
 
      
 }

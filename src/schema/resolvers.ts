@@ -16,14 +16,10 @@ export const resolvers={
     Query:{
         users:async()=>{
             try {
-
-                return user.find();
-                
+                return user.find();   
             } catch (error:any) {
                 throw new GraphQLError(`not found.`)
             }
-            
-     
         }
         ,
 
@@ -31,9 +27,7 @@ export const resolvers={
 
         messages:async()=>{
             try {
-
-                return Message.find();
-                
+                return Message.find();   
             } catch (error:any) {
                 throw new GraphQLError(`message not found.`)
             }
@@ -53,13 +47,8 @@ export const resolvers={
                     throw new GraphQLError(`${newUser.email} already exists`);
                 }
                 const savedUser = await newUser.save();
-                console.log("user created",name,email);
-
                 // publish suscription
                 pubsub.publish('newuser',{newUser:savedUser});
-
-
-
                 return  savedUser;
                 
             } catch (error:any) {
@@ -94,11 +83,8 @@ export const resolvers={
             try {
                 const mess= new Message({meassage:message , receiverEmail:receiverEmail,senderEmail:senderEmail,timestamps:timestamps});
                 const newmessage=await mess.save();
-
-                console.log("message",mess);
-                
                 // publish new message
-                pubsub.publish('newmessage',{newmessage:newmessage})
+                pubsub.publish('newmessage',{newMessage:newmessage})
                 return newmessage;
                 
             } catch (error:any) {
@@ -122,20 +108,18 @@ export const resolvers={
     Subscription:{
 
 
-        newuser:{
+        newUser:{
             subscribe:(_:any,{}:any) =>{
             return pubsub.asyncIterator('newuser')
              }    
         }
         ,
 
-        newmessage:{
-
+        newMessage:{
             subscribe:withFilter(
                 ()=>pubsub.asyncIterator('newmessage'),
-                (payload,variables)=>{
-                    return payload.receiverEmail===variables.receiverEmail;
-                }
+                (payload,variables)=> 
+                   payload.newMessage.receiverEmail===variables.receiverEmail,
             )
         
         }
