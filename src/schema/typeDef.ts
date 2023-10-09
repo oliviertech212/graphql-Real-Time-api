@@ -37,12 +37,16 @@ type Mutation{
     
     createmessage( senderEmail:String! receiverEmail:String! message:String! timestamps:Float!):Message!
 
+    updateUser(id:ID! name:String,email:String):User!
+    deleteUser(email:String!):User!
+
 }
 
 type Subscription{
 
     newUser:User
     newMessage(receiverEmail:String):Message
+    oldUser:User
 
      
 }

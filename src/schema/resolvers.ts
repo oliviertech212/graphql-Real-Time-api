@@ -60,6 +60,46 @@ export const resolvers={
                 
             }
            
+        },
+
+        updateUser:async(_:any,{id,name,email}:{id:string,name:string,email:string})=>{
+            try {
+
+                const newUser = new user({id:id,email:email });
+                const existuser= await user.findOne({ email: newUser.email });
+                    if (existuser){
+                        throw new GraphQLError(`${newUser.email} already exists`);
+                    }
+                const usertoUpdate= await user.findOneAndUpdate({_id:id},{name:name,email:email});
+                return usertoUpdate;
+                
+            } catch (error:any) {
+                throw Error (`Error while updating ${error.message}`);
+                
+            }
+        }
+        ,
+
+        deleteUser:async(_:any,{email}:{email:string})=>{
+            try {
+
+                const existuser= await user.findOne({ email:email });
+                    if (!existuser){
+                        throw new GraphQLError(`user with ${email} not found`);
+                    }
+                const usertoDelete= await user.findOneAndDelete({email:email});
+                const meassage= await Message.findOneAndDelete({senderEmail:email})
+
+
+               pubsub.publish('deleteUser',{oldUser:usertoDelete});
+               
+
+               return usertoDelete;
+                
+            } catch (error:any) {
+                throw Error (`Error while updating ${error.message}`);
+                
+            }
         }
   ,
 
@@ -78,8 +118,6 @@ export const resolvers={
         ,
 
         createmessage:async(_:any,{message,receiverEmail,senderEmail,timestamps}:any)=>{
-             
-
             try {
                 const mess= new Message({meassage:message , receiverEmail:receiverEmail,senderEmail:senderEmail,timestamps:timestamps});
                 const newmessage=await mess.save();
@@ -122,7 +160,15 @@ export const resolvers={
                    payload.newMessage.receiverEmail===variables.receiverEmail,
             )
         
-        }
+        },
+
+        oldUser:{
+            subscribe:(_:any,{}:any)=>{
+                return pubsub.asyncIterator('deleteUser')
+            }
+        },
+
+
 
 
 
