@@ -33,7 +33,7 @@ type Mutation{
     createuser(name:String! email:String!):User!
 
 
-    userTyping(email:String! receiverEmail:String!):Boolean!
+    userTyping(email:String! receiverEmail:String!):String!
     
     createmessage( senderEmail:String! receiverEmail:String! message:String! timestamps:Float!):Message!
 
@@ -47,6 +47,7 @@ type Subscription{
     newUser:User
     newMessage(receiverEmail:String):Message
     oldUser:User
+    userTyping(email:String! receiverEmail:String!):String!
 
      
 }

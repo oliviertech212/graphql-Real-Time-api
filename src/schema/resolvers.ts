@@ -104,13 +104,11 @@ export const resolvers={
   ,
 
         userTyping : async(_:any,{email,receiverEmail}:any)=>{
-
             try {
-
-
-                
-            } catch (error) {
-
+              await  pubsub.publish("usertyping",{userTyping:email});
+            return email ;     
+            } catch (error:any) {
+                throw Error (`Error while Typing ${error.message}`);
                 
             }
 
@@ -168,6 +166,17 @@ export const resolvers={
             }
         },
 
+        userTyping:{
+            subscribe:withFilter(
+                ()=>pubsub.asyncIterator('usertyping'),
+                (payload,variables)=>{
+                    console.log("payload: " + payload.userTyping);
+                    console.log("variables: " + variables.email);
+                   return   payload.userTyping === variables.email
+                   }
+                
+            )
+        }
 
 
 
