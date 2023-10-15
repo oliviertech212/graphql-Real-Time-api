@@ -20,7 +20,8 @@ type Message{
     id:ID!
     senderEmail:String!
     receiverEmail:String!
-    timestamps:Float!
+    timestamps:String
+    message:String!
     users:[User]
 
  }
@@ -31,14 +32,17 @@ type Message{
 type Mutation{
 
     createuser(name:String! email:String!):User!
-
+    updateUser(id:ID! name:String,email:String):User!
+    deleteUser(email:String!):User!
 
     userTyping(email:String! receiverEmail:String!):String!
     
-    createmessage( senderEmail:String! receiverEmail:String! message:String! timestamps:Float!):Message!
+    createmessage( senderEmail:String! receiverEmail:String! message:String! ):Message!
+    updateMessage(id:ID! newMessage:String!):Message
+    deleteMessage(id:ID!):Boolean!
+    deleteAll:Boolean!
 
-    updateUser(id:ID! name:String,email:String):User!
-    deleteUser(email:String!):User!
+   
 
 }
 

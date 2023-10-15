@@ -3,23 +3,6 @@
 import mongoose from "mongoose";
 import { Schema } from "mongoose";
 
-
-//  const  userSchema= new Schema({
-//     name:{
-//         required: true,
-//         type: "string",
-//     },
-//     email:{
-//         required: true,
-//         type: "string",
-//         unique: true
-//     }
-// });
-
-// const UserModel = mongoose.model("User", userSchema);
-// export default UserModel;
-
-
 const userSchema = new mongoose.Schema({
     name: { type: String, required: true },
     email: { type: String, required: true },
@@ -28,10 +11,10 @@ const userSchema = new mongoose.Schema({
  export const user = mongoose.model("User", userSchema);
 
 const msg = new mongoose.Schema({
-    message:{type: String},
+    message:{type: String,required: true},
     senderEmail:{type: String},
     receiverEmail:{type: String},
-    timestamps:{type: Number}
+    timestamps:{ type: Date, default: Date.now}
 });
 
 export const Message = mongoose.model('Message',msg);

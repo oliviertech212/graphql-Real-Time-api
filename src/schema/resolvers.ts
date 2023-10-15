@@ -2,6 +2,7 @@
 import {user} from '../models'
 import { Message } from '../models'
 import { GraphQLError } from 'graphql'
+import mongoose from 'mongoose'
 
 import { PubSub, withFilter } from 'graphql-subscriptions'
 const pubsub:any = new PubSub();
@@ -22,9 +23,6 @@ export const resolvers={
             }
         }
         ,
-
-
-
         messages:async()=>{
             try {
                 return Message.find();   
@@ -54,10 +52,7 @@ export const resolvers={
             } catch (error:any) {
                 console.log(error.message);
                 throw new GraphQLError(`${error}`)
-              
-
-                
-                
+                 
             }
            
         },
@@ -70,7 +65,9 @@ export const resolvers={
                     if (existuser){
                         throw new GraphQLError(`${newUser.email} already exists`);
                     }
-                const usertoUpdate= await user.findOneAndUpdate({_id:id},{name:name,email:email});
+                  
+                    
+                const usertoUpdate= await user.findOneAndUpdate({_id:id},{name:name,email:email},{new:true});
                 return usertoUpdate;
                 
             } catch (error:any) {
@@ -117,7 +114,7 @@ export const resolvers={
 
         createmessage:async(_:any,{message,receiverEmail,senderEmail,timestamps}:any)=>{
             try {
-                const mess= new Message({meassage:message , receiverEmail:receiverEmail,senderEmail:senderEmail,timestamps:timestamps});
+                const mess= new Message({message:message , receiverEmail:receiverEmail,senderEmail:senderEmail,timestamps:timestamps});
                 const newmessage=await mess.save();
                 // publish new message
                 pubsub.publish('newmessage',{newMessage:newmessage})
@@ -125,16 +122,54 @@ export const resolvers={
                 
             } catch (error:any) {
 
-                console.log("ggggggg");
+                console.log(`${error.message}`);
                 
             }
             
 
+        },
+
+        updateMessage:async (_:any,{id, newMessage}:any) => {
+            try {
+             const mess =await Message.findById({_id: new mongoose.Types.ObjectId(id)});
+           
+             if (!mess) {
+            throw new Error ("Could not find message");
+             }
+                const messageUpdate = Message.findByIdAndUpdate ({_id: new mongoose.Types.ObjectId(id)},{message:newMessage},{new:true});
+             return messageUpdate;
+             
+                
+            } catch (error:any) {
+
+
+                throw new Error(`${error.message}`)
+                
+            }
+
+
+        }
+        ,
+        deleteMessage:async(_:any,id:string)=>{
+            try{ 
+               await Message.findOneAndDelete({_id: new mongoose.Types.ObjectId(id) });
+               return true;
+            }catch(error:any){
+                console.log(error.message);
+                
+            }
         }
 
-
-
-
+        ,
+        deleteAll:async(_:any)=>{
+            try{ 
+               await Message.deleteMany();
+               return true;
+            }catch(error:any){
+                console.log(error.message);
+                
+            }
+        }
 
     }
 
