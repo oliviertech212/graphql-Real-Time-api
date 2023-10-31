@@ -88,7 +88,7 @@ export const resolvers={
                 const meassage= await Message.findOneAndDelete({senderEmail:email})
 
 
-               pubsub.publish('deleteUser',{oldUser:usertoDelete});
+               pubsub.publish('deleteUser',{userDeleted:usertoDelete});
                
 
                return usertoDelete;
@@ -102,8 +102,12 @@ export const resolvers={
 
         userTyping : async(_:any,{email,receiverEmail}:any)=>{
             try {
-              await  pubsub.publish("usertyping",{userTyping:email});
-            return email ;     
+                const existuser= await user.findOne({ email:email });
+                if (!existuser){
+                    throw new GraphQLError(`user with ${email} not found`);
+                }
+                 pubsub.publish("usertyping",{userTyping:email});
+            return existuser ;     
             } catch (error:any) {
                 throw Error (`Error while Typing ${error.message}`);
                 
@@ -122,11 +126,8 @@ export const resolvers={
                 
             } catch (error:any) {
 
-                console.log(`${error.message}`);
-                
+                console.log(`${error.message}`);   
             }
-            
-
         },
 
         updateMessage:async (_:any,{id, newMessage}:any) => {
@@ -195,7 +196,7 @@ export const resolvers={
         
         },
 
-        oldUser:{
+        userDeleted:{
             subscribe:(_:any,{}:any)=>{
                 return pubsub.asyncIterator('deleteUser')
             }
@@ -204,11 +205,12 @@ export const resolvers={
         userTyping:{
             subscribe:withFilter(
                 ()=>pubsub.asyncIterator('usertyping'),
-                (payload,variables)=>{
-                    console.log("payload: " + payload.userTyping);
-                    console.log("variables: " + variables.email);
-                   return   payload.userTyping === variables.email
-                   }
+                (payload,variables)=>
+                // {
+                //     console.log("payload: " + payload.userTyping);
+                //     console.log("variables: " + variables.email);
+                     payload.userTyping === variables.email
+                //    }
                 
             )
         }

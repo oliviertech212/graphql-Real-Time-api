@@ -35,7 +35,7 @@ type Mutation{
     updateUser(id:ID! name:String,email:String):User!
     deleteUser(email:String!):User!
 
-    userTyping(email:String! receiverEmail:String!):String!
+    userTyping(email:String! receiverEmail:String!):User!
     
     createmessage( senderEmail:String! receiverEmail:String! message:String! ):Message!
     updateMessage(id:ID! newMessage:String!):Message
@@ -50,8 +50,8 @@ type Subscription{
 
     newUser:User
     newMessage(receiverEmail:String):Message
-    oldUser:User
-    userTyping(email:String! receiverEmail:String!):String!
+    userDeleted:User
+    userTyping(email:String! receiverEmail:String!):User!
 
      
 }
