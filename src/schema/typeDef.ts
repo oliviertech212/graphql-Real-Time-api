@@ -3,10 +3,7 @@
  export const typeDefs= 
 
 `
- type Query{
-    users:[User]
-    messages:[Message]
- }
+
  
 
 type  User{
@@ -28,6 +25,12 @@ type Message{
 
 
 
+ type Query{
+    users:[User]
+    messages:[Message]
+    userMessages(userID:String!):[Message]
+ }
+
 
 type Mutation{
 
@@ -37,7 +40,7 @@ type Mutation{
 
     userTyping(email:String! receiverEmail:String!):User!
     
-    createmessage( senderEmail:String! receiverEmail:String! message:String! ):Message!
+    createmessage( senderEmail:String! receiverEmail:String! message:String! userID:String):Message!
     updateMessage(id:ID! newMessage:String!):Message
     deleteMessage(id:ID!):Boolean!
     deleteAll:Boolean!

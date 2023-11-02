@@ -2,7 +2,7 @@
 import {user} from '../models'
 import { Message } from '../models'
 import { GraphQLError } from 'graphql'
-import mongoose from 'mongoose'
+import mongoose, { Schema } from 'mongoose'
 
 import { PubSub, withFilter } from 'graphql-subscriptions'
 const pubsub:any = new PubSub();
@@ -20,6 +20,18 @@ export const resolvers={
                 return user.find();   
             } catch (error:any) {
                 throw new GraphQLError(`not found.`)
+            }
+        },
+        userMessages:async(_:any,userID:any)=>{
+            try{
+             const  messages=  await Message.find({userMessage:new mongoose.Types.ObjectId(userID.userID)});
+             if(!messages){
+                throw new GraphQLError("no messages found")
+             }
+             return messages;
+
+            }catch(error:any){
+                 throw new GraphQLError(error.message)
             }
         }
         ,
@@ -106,7 +118,7 @@ export const resolvers={
                 if (!existuser){
                     throw new GraphQLError(`user with ${email} not found`);
                 }
-                 pubsub.publish("usertyping",{userTyping:email});
+                 pubsub.publish("usertyping",{userTyping:{email:email}});
             return existuser ;     
             } catch (error:any) {
                 throw Error (`Error while Typing ${error.message}`);
@@ -116,9 +128,27 @@ export const resolvers={
         }
         ,
 
-        createmessage:async(_:any,{message,receiverEmail,senderEmail,timestamps}:any)=>{
-            try {
-                const mess= new Message({message:message , receiverEmail:receiverEmail,senderEmail:senderEmail,timestamps:timestamps});
+        createmessage:async(_:any,{message,receiverEmail,senderEmail,timestamps,userID}:any)=>{
+            try { 
+
+                const User = new user({id:userID,email:receiverEmail});
+                 console.log("hello user found",User);
+                 
+                const existuser= await user.findOne({_id:userID,email:receiverEmail});
+                console.log(existuser);
+                
+                if (!existuser){
+                    throw new GraphQLError(`user with ${receiverEmail} does not exists`);
+                }
+
+                    
+                const mess= new Message({message:message ,
+                     receiverEmail:receiverEmail,
+                     senderEmail:senderEmail,
+                     timestamps:timestamps,
+                     userMessage:userID
+                    
+                    });
                 const newmessage=await mess.save();
                 // publish new message
                 pubsub.publish('newmessage',{newMessage:newmessage})
@@ -205,20 +235,9 @@ export const resolvers={
         userTyping:{
             subscribe:withFilter(
                 ()=>pubsub.asyncIterator('usertyping'),
-                (payload,variables)=>
-                // {
-                //     console.log("payload: " + payload.userTyping);
-                //     console.log("variables: " + variables.email);
-                     payload.userTyping === variables.email
-                //    }
-                
+                (payload,variables)=> payload.userTyping.email === variables.email,
             )
         }
-
-
-
-
-
 
     }
 }
