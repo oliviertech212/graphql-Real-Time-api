@@ -23,6 +23,10 @@ type Message{
 
  }
 
+type userToken{
+    token:String!
+}
+
 
 
  type Query{
@@ -34,7 +38,7 @@ type Message{
 
 type Mutation{
 
-    createuser(name:String! email:String!):User!
+    createuser(name:String! email:String!,password:String!):User!
     updateUser(id:ID! name:String,email:String):User!
     deleteUser(email:String!):User!
 
@@ -44,6 +48,9 @@ type Mutation{
     updateMessage(id:ID! newMessage:String!):Message
     deleteMessage(id:ID!):Boolean!
     deleteAll:Boolean!
+
+
+    userLogin (email:String!,password:String!):userToken!
 
    
 

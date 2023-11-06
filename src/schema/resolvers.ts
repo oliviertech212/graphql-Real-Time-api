@@ -3,13 +3,16 @@ import {user} from '../models'
 import { Message } from '../models'
 import { GraphQLError } from 'graphql'
 import mongoose, { Schema } from 'mongoose'
+import * as orgon2 from 'argon2';
+const  jwt = require('jsonwebtoken');
 
 import { PubSub, withFilter } from 'graphql-subscriptions'
 const pubsub:any = new PubSub();
 
 type usertype={
     name:string,
-    email:string
+    email:string,
+    password:string
 }
 
 export const resolvers={
@@ -22,6 +25,10 @@ export const resolvers={
                 throw new GraphQLError(`not found.`)
             }
         },
+        getLogedInUser:async(_:any,id:string)=>{
+             
+        }
+        ,
         userMessages:async(_:any,userID:any)=>{
             try{
              const  messages=  await Message.find({userMessage:new mongoose.Types.ObjectId(userID.userID)});
@@ -47,10 +54,12 @@ export const resolvers={
     },
 
     Mutation:{
-        createuser: async(_:any,{name, email}:usertype)=>{
+        createuser: async(_:any,{name, email,password}:usertype)=>{
             try {
 
-                const newUser = new user({ name: name, email: email });
+                const hash = await orgon2.hash(password);
+
+                const newUser = new user({ name: name, email: email, password:hash});
 
                 const existuser= await user.findOne({ email: newUser.email });
                 if (existuser){
@@ -200,9 +209,35 @@ export const resolvers={
                 console.log(error.message);
                 
             }
-        }
+        },
 
-    }
+        // authentication resolvers
+        userLogin : async(_:any,{email:email,password}:{email:string,password:string})=>{  
+
+            try {
+                const hash = await orgon2.hash(password);
+                const userExists = await user.findOne({ email:email});
+            
+                if(!userExists){
+                    throw new Error (` User with ${email} not found `);
+                }
+                const userpassword =userExists.password;                
+                if(await orgon2.verify(userpassword,password)){
+                    const token = jwt.sign({emal:email, userId: userExists.id }, 'secret', { expiresIn: '1h' } );
+                      return {token:token};
+                }else{
+                    throw new Error(`password not match`)
+                }
+
+            } catch (error:any) {
+                
+                throw new Error(`${error.message}`)
+            }
+
+         }
+
+
+        }
 
     ,
 
