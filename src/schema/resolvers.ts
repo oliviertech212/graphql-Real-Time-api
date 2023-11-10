@@ -5,6 +5,7 @@ import { GraphQLError } from 'graphql'
 import mongoose, { Schema } from 'mongoose'
 import * as orgon2 from 'argon2';
 const  jwt = require('jsonwebtoken');
+import { getLogedInUser } from '../helpers/user.helpers';
 
 import { PubSub, withFilter } from 'graphql-subscriptions'
 const pubsub:any = new PubSub();
@@ -18,15 +19,24 @@ type usertype={
 export const resolvers={
 
     Query:{
-        users:async()=>{
+        users:async(_:any, args:any, context:any)=>{
+            const {userfound}=context;
             try {
                 return user.find();   
             } catch (error:any) {
                 throw new GraphQLError(`not found.`)
             }
         },
-        getLogedInUser:async(_:any,id:string)=>{
-             
+        getLogedInUser:async(_:any,args:any,context:any)=>{
+            try {
+                const {userfound}=context;
+            const user=await getLogedInUser(userfound)
+            console.log("userfound",userfound,user);
+            return user  ; 
+            } catch (error:any) {
+                console.log(error.message);
+                
+            }
         }
         ,
         userMessages:async(_:any,userID:any)=>{
@@ -223,7 +233,7 @@ export const resolvers={
                 }
                 const userpassword =userExists.password;                
                 if(await orgon2.verify(userpassword,password)){
-                    const token = jwt.sign({emal:email, userId: userExists.id }, 'secret', { expiresIn: '1h' } );
+                    const token = jwt.sign({email:email, userId: userExists.id }, process.env.JWT_SECRET, { expiresIn: '10h' } );
                       return {token:token};
                 }else{
                     throw new Error(`password not match`)

@@ -33,6 +33,7 @@ type userToken{
     users:[User]
     messages:[Message]
     userMessages(userID:String!):[Message]
+    getLogedInUser:[User]
  }
 
 
