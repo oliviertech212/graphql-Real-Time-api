@@ -51,9 +51,7 @@ type Mutation{
     deleteAll:Boolean!
 
 
-    userLogin (email:String!,password:String!):userToken!
-
-   
+    userLogin (email:String!,password:String!):userToken! 
 
 }
 

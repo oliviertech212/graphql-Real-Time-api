@@ -5,7 +5,9 @@ import { GraphQLError } from 'graphql'
 import mongoose, { Schema } from 'mongoose'
 import * as orgon2 from 'argon2';
 const  jwt = require('jsonwebtoken');
+
 import { getLogedInUser } from '../helpers/user.helpers';
+
 
 import { PubSub, withFilter } from 'graphql-subscriptions'
 const pubsub:any = new PubSub();
@@ -233,8 +235,10 @@ export const resolvers={
                 }
                 const userpassword =userExists.password;                
                 if(await orgon2.verify(userpassword,password)){
+
                     const token = jwt.sign({email:email, userId: userExists.id }, process.env.JWT_SECRET, { expiresIn: '10h' } );
                       return {token:token};
+
                 }else{
                     throw new Error(`password not match`)
                 }
