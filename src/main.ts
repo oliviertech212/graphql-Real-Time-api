@@ -9,6 +9,8 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 
+import decodeToken from './auth/decodeToken';
+
 const db: string = process.env.DB || ""
 
 const connect = async () => {

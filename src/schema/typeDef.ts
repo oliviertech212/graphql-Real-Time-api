@@ -23,12 +23,17 @@ type Message{
 
  }
 
+type userToken{
+    token:String!
+}
+
 
 
  type Query{
     users:[User]
     messages:[Message]
     userMessages(userID:String!):[Message]
+    getLogedInUser:[User]
  }
 
 
@@ -46,9 +51,7 @@ type Mutation{
     deleteAll:Boolean!
 
 
-    userLogin (email:String!,password:String!):String
-
-   
+    userLogin (email:String!,password:String!):userToken! 
 
 }
 
